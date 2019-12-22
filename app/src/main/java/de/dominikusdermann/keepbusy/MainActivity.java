@@ -13,6 +13,8 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -33,9 +35,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView headline;
     private Button buttonNotifications;
     private int notifcatication_progress;
+    private int time_progress;
     private ConstraintLayout constraintLayout;
     public Context main_context = this;
     public String CHANNEL_ID = "keepBusy";
+    private NotificationManagerCompat notificationManager;
 
 
     @Override
@@ -55,10 +59,11 @@ public class MainActivity extends AppCompatActivity {
 
         // initialize variables
         notifcatication_progress = seekBarNotifiactions.getProgress() * 10;
+        time_progress = seekBarTime.getProgress();
 
         // build notification channel
         createNotificationChannel();
-        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager = NotificationManagerCompat.from(this);
 
         // set and control seekbar for amount of notifications
         amountNotifications.setText("Amount of notifications per minute: " + seekBarNotifiactions.getProgress() *10 + " / " + seekBarNotifiactions.getMax() *10);
@@ -81,21 +86,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // set and control seekbar for time
+        textViewTime.setText("Time during which notificaitons are send: " + seekBarTime.getProgress() + " minutes.");
+        seekBarTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                time_progress = i;
+                textViewTime.setText("Time during which notificaitons are send: " + seekBarTime.getProgress() + " minutes.");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                textViewTime.setText("Time during which notificaitons are send: " + seekBarTime.getProgress() + " minutes.");
+            }
+        });
 
 
         buttonNotifications.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar snackbar = Snackbar.make(constraintLayout, "You triggered " +  notifcatication_progress + " notifications in the next minute.", Snackbar.LENGTH_LONG);
-                snackbar.show();
-                headline.setText("Busy acting in progress...");
-                NotificationCompat.Builder n_builder = new NotificationCompat.Builder(main_context, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.messages)
-                        .setColorized(true)
-                        .setContentTitle("Success.")
-                        .setContentText("This worked so well!")
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                notificationManager.notify(1, n_builder.build());
+                createNotifications();
             }
         });
 
@@ -116,5 +131,38 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
     }
+
+    public void createNotifications() {
+        // notify user of action
+        Snackbar snackbar = Snackbar.make(constraintLayout, "You triggered " +  notifcatication_progress + " notifications in the next " + time_progress + " minute(s).", Snackbar.LENGTH_LONG);
+        snackbar.show();
+        headline.setText("Busy acting in progress...");
+
+        // calculate distance between notifications
+        final long delay_seconds = (time_progress * 60) / notifcatication_progress;
+
+        // perform notifications according to specification
+        for(int i = 0; i < notifcatication_progress; i++){
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    NotificationCompat.Builder n_builder = new NotificationCompat.Builder(main_context, CHANNEL_ID)
+                            .setSmallIcon(R.drawable.messages)
+                            .setColorized(true)
+                            .setContentTitle("New message from:")
+                            .setContentText("John.")
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                    notificationManager.notify(1, n_builder.build());
+                    handler.postDelayed(this, delay_seconds);
+                }
+            }, delay_seconds);
+        }
+
+        // done; reset headline
+        headline.setText("Act real busy");
+    }
+
+
 
 }
