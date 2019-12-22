@@ -142,6 +142,9 @@ public class MainActivity extends AppCompatActivity {
         final long delay_seconds = (time_progress * 60) / notifcatication_progress;
 
         // perform notifications according to specification
+        final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        inboxStyle.setBigContentTitle("You have new messages.");
+
         for(int i = 0; i < notifcatication_progress; i++){
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -153,12 +156,13 @@ public class MainActivity extends AppCompatActivity {
                             .setContentTitle("New message from:")
                             .setContentText("John.")
                             .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                    inboxStyle.addLine("New message from John.");
+                    n_builder.setStyle(inboxStyle);
                     notificationManager.notify(1, n_builder.build());
                     handler.postDelayed(this, delay_seconds);
                 }
             }, delay_seconds);
         }
-
         // done; reset headline
         headline.setText("Act real busy");
     }
