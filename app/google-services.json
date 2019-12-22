@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "960507169567",
+    "firebase_url": "https://keepbusy-66051.firebaseio.com",
+    "project_id": "keepbusy-66051",
+    "storage_bucket": "keepbusy-66051.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:960507169567:android:502ea6d81b184bb8e07e2a",
+        "android_client_info": {
+          "package_name": "de.dominikusdermann.keepbusy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "960507169567-bonjg7a20dn39bu3mfmr0iauq27n82vv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9Bsj-oZkOOSQovVAJmMkbASYxXJ_W2lo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "960507169567-bonjg7a20dn39bu3mfmr0iauq27n82vv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
