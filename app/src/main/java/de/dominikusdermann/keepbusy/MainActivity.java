@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     public Context main_context = this;
     public String CHANNEL_ID = "keepBusy";
     private NotificationManagerCompat notificationManager;
+    private Button buttonInterupt;
+    private Thread thread;
 
 
     @Override
@@ -55,10 +57,11 @@ public class MainActivity extends AppCompatActivity {
         constraintLayout = (ConstraintLayout) findViewById(R.id.constraintLayoutMain);
         seekBarTime = (SeekBar) findViewById(R.id.seekBarTime);
         textViewTime = (TextView) findViewById(R.id.textViewTime);
+        buttonInterupt = (Button) findViewById(R.id.buttonInterrupt);
 
 
         // initialize variables
-        notifcatication_progress = seekBarNotifiactions.getProgress() * 10;
+        notifcatication_progress = seekBarNotifiactions.getProgress() * 2;
         time_progress = seekBarTime.getProgress();
 
         // build notification channel
@@ -66,13 +69,13 @@ public class MainActivity extends AppCompatActivity {
         notificationManager = NotificationManagerCompat.from(this);
 
         // set and control seekbar for amount of notifications
-        amountNotifications.setText("Amount of notifications per minute: " + seekBarNotifiactions.getProgress() *10 + " / " + seekBarNotifiactions.getMax() *10);
+        amountNotifications.setText("Amount of notifications per minute: " + seekBarNotifiactions.getProgress() * 2 + " / " + seekBarNotifiactions.getMax() * 2);
         seekBarNotifiactions.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                notifcatication_progress = i * 10;
-                amountNotifications.setText("Amount of notifications per minute: " + notifcatication_progress + " / " + seekBarNotifiactions.getMax() * 10);
+                notifcatication_progress = i * 2;
+                amountNotifications.setText("Amount of notifications per minute: " + notifcatication_progress + " / " + seekBarNotifiactions.getMax() * 2);
             }
 
             @Override
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                amountNotifications.setText("Amount of notifications per minute: " + notifcatication_progress + " / " + seekBarNotifiactions.getMax() * 10);
+                amountNotifications.setText("Amount of notifications per minute: " + notifcatication_progress + " / " + seekBarNotifiactions.getMax() * 2);
             }
         });
 
@@ -111,6 +114,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 createNotifications();
+            }
+        });
+
+        buttonInterupt.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                thread.interrupt();
             }
         });
 
@@ -145,28 +155,31 @@ public class MainActivity extends AppCompatActivity {
         final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.setBigContentTitle("You have new messages.");
 
-        for(int i = 0; i < notifcatication_progress; i++){
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    NotificationCompat.Builder n_builder = new NotificationCompat.Builder(main_context, CHANNEL_ID)
-                            .setSmallIcon(R.drawable.messages)
-                            .setColorized(true)
-                            .setContentTitle("New message from:")
-                            .setContentText("John.")
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                    inboxStyle.addLine("New message from John.");
-                    n_builder.setStyle(inboxStyle);
-                    notificationManager.notify(1, n_builder.build());
-                    handler.postDelayed(this, delay_seconds);
+        Log.i("amoutn notfi: ", Integer.toString(notifcatication_progress));
+
+        thread = new Thread() {
+            public void run() {
+                try {
+                    for(int i = 0; i < notifcatication_progress; i++){
+                        Log.i("round of for: ", Integer.toString(i));
+                        NotificationCompat.Builder n_builder = new NotificationCompat.Builder(main_context, CHANNEL_ID)
+                                .setSmallIcon(R.drawable.messages)
+                                .setColorized(true)
+                                .setContentTitle("New message from:")
+                                .setContentText("John.")
+                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                        inboxStyle.addLine("New message from John.");
+                        n_builder.setStyle(inboxStyle);
+                        notificationManager.notify(1, n_builder.build());
+                        Thread.sleep(delay_seconds * 1000);
+                            }
+                    } catch (InterruptedException e) {
+                    Log.e("Thread error", "local Thread error", e);
                 }
-            }, delay_seconds);
-        }
+            }
+        };
+        thread.start();
         // done; reset headline
         headline.setText("Act real busy");
     }
-
-
-
 }
